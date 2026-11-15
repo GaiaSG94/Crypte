@@ -15,7 +15,8 @@ describe("space.css", () => {
   });
 
   it("garde la bulle utilisateur claire", () => {
-    const regle = /:root\[data-space="on"\][^{]*\.msg\.role-user\s*\{[^}]*background:\s*var\(--space-fg\)/;
+    const regle =
+      /:root\[data-space="on"\][^{]*\.msg\.role-user\s*\{[^}]*background:\s*var\(--space-fg\)/;
     expect(css).toMatch(regle);
   });
 });
