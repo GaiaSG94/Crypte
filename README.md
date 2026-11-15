@@ -1,14 +1,40 @@
 # Crypte (Tauri + Svelte)
 
-LLM chat in a haunted crypt, as a desktop app: a bestiary of pixel-art
-creatures, the spirit hub, Kiro the mascot ghost, apparitions that react
-to the chat, horror effects (vignette, fog, lightning), a header **fear
-gauge** (`fear`, % of the model's context window), and a **global** token
-counter. Port of the `kiro-horror-tui` terminal app to **Tauri v2** (Rust
-backend) + **Svelte 5** (web frontend), same features, same crypt palette.
+LLM chat in a haunted crypt, as a desktop app: creatures of pixel art
+(the Haunt bestiary), the spirit hub, Kiro the mascot ghost, apparitions
+that react to the chat, horror effects (vignette, fog, lightning), a
+header **fear gauge** (`fear`, % of the model's context window), and a
+**global** token counter. Port of the `kiro-horror-tui` terminal app to
+**Tauri v2** (Rust backend) + **Svelte 5** (web frontend), same features,
+same crypt palette.
 
 Screens: Chat, Settings, Vps, Haunt, plus the inter-agent panel (bus +
 mailbox) and the 3D project space (F7/F8).
+
+## Install (v1.0.0)
+
+Releases : <https://github.com/Tradoooo/Crypte/releases> (bundles Tauri
+Windows `.msi`, macOS `.dmg`, Linux `.AppImage`, plus the terminal build
+`kiro-horror-tui` for Linux/macOS).
+
+```sh
+# macOS : clic droit > Ouvrir (build non signée)
+open Crypt-1.0.0-macos.dmg
+# Linux
+chmod +x Crypt-1.0.0-linux-x64.AppImage && ./Crypt-1.0.0-linux-x64.AppImage
+# Windows : installeur .msi (SmartScreen : More info > Run anyway)
+```
+
+### Journey (the one from the video)
+
+1. Clone your project from GitHub.
+2. Launch Crypt **inside that folder** (the folder is the project drawn
+   in the 3D crypt).
+3. Press **F8** to switch the 3D background on, **F7** for the hub of
+   every project, **F5** for a scare, **F9** to play Haunt.
+
+Without a release binary: `npm install && npm run tauri dev` in this
+repository (needs Rust stable, Node 22+ and the Tauri system libs).
 
 ## Stack
 
