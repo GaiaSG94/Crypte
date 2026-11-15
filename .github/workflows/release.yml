@@ -278,10 +278,12 @@ jobs:
       - name: Notes de version
         env:
           APP: ${{ github.event.repository.html_url }}
+          TAG: ${{ needs.demande.outputs.tag }}
         run: |
           set -eu
-          cat > notes.md <<'EOF'
-          ### Crypt 1.0.0 — a chat for coding agents in a haunted crypt
+          ver="${TAG#v}"
+          cat > notes.md <<EOF
+          ### Crypt $ver — a chat for coding agents in a haunted crypt
 
           **See where your agents work.** The desktop app renders your
           projects as a 3D crypt in the background while the agent reads,
@@ -289,24 +291,28 @@ jobs:
           plates, the ghost flies to what it touches.
 
           #### Install (desktop app)
-          - **Windows** : `Crypt-1.0.0-x64.msi` (SmartScreen may warn: click *More info → Run anyway*, the installer is unsigned)
-          - **macOS** : `Crypt-1.0.0-macos.dmg` (Apple silicon + Intel) — right-click the app → **Open** the first time (unsigned build)
-          - **Linux** : `Crypt-1.0.0-linux-x64.AppImage` — `chmod +x` then run
+          - **Windows** : crypte_${ver}_x64_en-US.msi (SmartScreen may
+            warn: click *More info → Run anyway*, the installer is unsigned)
+          - **macOS** : crypte_${ver}_universal.dmg (Apple silicon +
+            Intel) — right-click the app → **Open** the first time (unsigned)
+          - **Linux** : crypte_${ver}_amd64.AppImage — chmod +x then run
 
           #### Journey (the one from the video)
           1. Clone your project from GitHub.
           2. Launch Crypt inside that folder.
-          3. Press **F8** to turn the 3D background on, **F7** for the hub
-             of every project, **F5** for a scare, **F9** to play Haunt.
+          3. Press **F7** — the 3D crypt turns on and pulls back over
+             **every project you run**. F8 toggles the background, F5 is a
+             scare, F9 plays Haunt.
 
           #### Terminal version (TUI)
-          `kiro-horror-tui-*.tar.gz` : the Ghostty/terminal build of the
-          same crypt (software-rendered 3D behind the cells). Untar and
-          run the binary — needs a Kitty-capable terminal.
+          kiro-horror-tui-linux-x64.tar.gz / kiro-horror-tui-macos.tar.gz :
+          the Ghostty/terminal build of the same crypt (software-rendered
+          3D behind the cells). Untar and run the binary — needs a
+          Kitty-capable terminal.
 
           #### Source
-          MIT, source at REPO_URL/tree/v1.0.0 — spec, steering and hooks
-          live in `.kiro/`. Built with Kiro.
+          MIT, source at REPO_URL/tree/$TAG — spec, steering and hooks
+          live in .kiro/. Built with Kiro.
           EOF
           sed -i "s|REPO_URL|$APP|g" notes.md
       - name: Publication (tag + release + assets)

@@ -11,18 +11,18 @@ same crypt palette.
 Screens: Chat, Settings, Vps, Haunt, plus the inter-agent panel (bus +
 mailbox) and the 3D project space (F7/F8).
 
-## Install (v1.0.0)
+## Install
 
 Releases : <https://github.com/Tradoooo/Crypte/releases> (bundles Tauri
 Windows `.msi`, macOS `.dmg`, Linux `.AppImage`, plus the terminal build
 `kiro-horror-tui` for Linux/macOS).
 
 ```sh
-# macOS : clic droit > Ouvrir (build non signée)
-open Crypt-1.0.0-macos.dmg
+# macOS : right-click the app > Open (unsigned build)
+open crypte_1.0.0_universal.dmg
 # Linux
-chmod +x Crypt-1.0.0-linux-x64.AppImage && ./Crypt-1.0.0-linux-x64.AppImage
-# Windows : installeur .msi (SmartScreen : More info > Run anyway)
+chmod +x crypte_1.0.0_amd64.AppImage && ./crypte_1.0.0_amd64.AppImage
+# Windows : installer .msi (SmartScreen : More info > Run anyway)
 ```
 
 ### Journey (the one from the video)
@@ -30,8 +30,9 @@ chmod +x Crypt-1.0.0-linux-x64.AppImage && ./Crypt-1.0.0-linux-x64.AppImage
 1. Clone your project from GitHub.
 2. Launch Crypt **inside that folder** (the folder is the project drawn
    in the 3D crypt).
-3. Press **F8** to switch the 3D background on, **F7** for the hub of
-   every project, **F5** for a scare, **F9** to play Haunt.
+3. Press **F7** — the 3D crypt turns on and pulls back over **every
+   project you run**. F8 toggles the background, **F5** is a scare, F9
+   plays Haunt.
 
 Without a release binary: `npm install && npm run tauri dev` in this
 repository (needs Rust stable, Node 22+ and the Tauri system libs).
