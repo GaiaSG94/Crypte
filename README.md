@@ -7,8 +7,8 @@ gauge** (`fear`, % of the model's context window), and a **global** token
 counter. Port of the `kiro-horror-tui` terminal app to **Tauri v2** (Rust
 backend) + **Svelte 5** (web frontend), same features, same crypt palette.
 
-Screens: Chat, Settings, Vps, Shop, Haunt (+ bestiary gallery), plus the
-inter-agent panel (bus + mailbox).
+Screens: Chat, Settings, Vps, Haunt, plus the inter-agent panel (bus +
+mailbox) and the 3D project space (F7/F8).
 
 ## Stack
 
@@ -43,7 +43,7 @@ The binary embeds the TUI's headless surface (same names, same effects):
 
 ```sh
 crypte --smoke            # self-check, no network, no key
-crypte --sheet out.png    # bestiary sheet (34 drawings) as PNG
+crypte --sheet out.png    # creature sheet (34 drawings) as PNG
 crypte --apercu out.json  # preview report as JSON
 crypte --mbox <args...>   # broadcast CLI (same files as bcast shell)
 crypte --events-log f     # append domain events as JSONL (KH_EVENTS_LOG)
