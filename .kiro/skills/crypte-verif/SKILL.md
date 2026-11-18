@@ -1,46 +1,56 @@
 ---
 name: crypte-verif
-description: Vérifier kiro-horror-tui sans réseau ni clé (smoke test headless, tests, formatage, aperçus ANSI) et produire la release Ghostty (fenêtre habillée, rebuild depuis origin/main). Utiliser avant tout commit, après retouche visuelle, ou pour livrer un binaire.
+description: Verify Crypt without network or key (headless smoke test, Rust tests, frontend types, vitest, build) and check the release bundle. Use before any commit, after a visual change, or to ship a binary.
 ---
 
-# Vérification et release de la crypte
+# Verification and release of Crypt
 
-## Smoke test headless (sans réseau, sans clé)
+All commands run **from the repository root**.
 
-```sh
-cargo build                      # 0 warning exigé
-cargo test                       # tout vert exigé
-cargo fmt --check                # formatage propre exigé
-./target/debug/kiro-horror-tui --smoke              # rendu headless 80x24
-./target/debug/kiro-horror-tui --apercu /tmp/crypte.ans  # 4 écrans x 2 tailles, lire avec cat dans Ghostty
-./target/debug/kiro-horror-tui --once "Reply with exactly: OK"  # nécessite clé ou --muse-auth
-```
-
-Après retouche visuelle, ajouter la commande de régénération couverte
-par le skill `pixel-art` (`--planche`, `--haunt-shot`).
-
-## Règles fichiers (rappel AGENTS.md)
-
-- Fichier : 500 lignes max ET 30 fonctions max (tests inclus).
-- Fonction : moins de 50 lignes. Au-delà : découper, jamais laisser grossir.
-- Vérifier : `wc -l` + `grep -cE 'fn [a-zA-Z_][a-zA-Z0-9_]* *\('`
-  sur chaque fichier touché. Zéro duplication (helpers partagés).
-- UI et messages en anglais ; clé API jamais affichée ni logguée.
-
-## Release Ghostty
-
-Le lanceur `ghostty/crypte` utilise le terminal courant s'il peut
-accueillir la crypte (TTY interactif, truecolor, ≥ 80x24), sinon il
-ouvre une fenêtre Ghostty habillée (thème + shader, build release
-si besoin) :
+## Headless smoke test (no network, no key)
 
 ```sh
-KH_API_KEY=... KH_MODEL=... ghostty/crypte
-ghostty/crypte rebuild --muse-auth   # origin/main frais dans un worktree dédié, build release forcé, checkout courant intact
-cargo build --release                # met à jour le symlink `kiro-horror-tui`
-ghostty/crypte-test.sh               # dispatch lanceur (sur place vs fenêtre)
+npm install
+npm run check            # svelte-check (types) — 0 error
+npm test                 # vitest
+npm run build            # static frontend -> build/
+cargo fmt --manifest-path src-tauri/Cargo.toml --check
+cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
+cargo test --manifest-path src-tauri/Cargo.toml
+cargo run --manifest-path src-tauri/Cargo.toml -- --smoke        # headless render, no network, no key
+cargo run --manifest-path src-tauri/Cargo.toml -- --sheet out.png # creature sheet
+cargo run --manifest-path src-tauri/Cargo.toml -- --apercu out.json
 ```
 
-`rebuild` refuse uniquement si le worktree géré est sale (un arbre
-courant sale ne bloque pas). Avec `--muse-auth`, la clé vient de
-`~/.config/muse/auth.json` (jamais affichée ni copiée).
+After a visual change, add the regeneration command covered by the
+`pixel-art` skill (`--sheet`, `--haunt-shot`).
+
+## File rules (recall of AGENTS.md)
+
+- File: 500 lines max AND 30 functions max (tests included).
+- Function: under 50 lines. Beyond that: split, never let it grow.
+- Check: `wc -l` plus `grep -cE 'fn [a-zA-Z_][a-zA-Z0-9_]* *\('` on every
+  file touched. Zero duplication (shared helpers).
+- UI and messages in English; the API key is never displayed nor logged.
+- Colours through the palette only (`src-tauri/src/theme.rs`,
+  `src/lib/crypte.css`).
+
+## Release
+
+The release workflow (`.github/workflows/release.yml`) publishes the desktop
+app for the three platforms (Windows `.msi`, macOS `.dmg`, Linux
+`.AppImage`) plus the terminal binaries, on a push to `main` that touches
+`.github/release-request.json` (tag + title in the file). To request one:
+
+```json
+{ "tag": "v1.0.3", "status": "pending", "comment": "..." }
+```
+
+The site (GitHub Pages, branch `gh-pages`) always points to
+`releases/latest`: never hardcode a version number in a link.
+
+Local check of the terminal build (branch `feat/project-space-3d`):
+
+```sh
+cargo build --release --manifest-path src-tauri/Cargo.toml
+```

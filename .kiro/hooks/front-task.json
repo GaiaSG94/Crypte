@@ -1,0 +1,14 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "frontend-test-green",
+      "trigger": "PostTaskExecution",
+      "timeout": 300,
+      "action": {
+        "type": "command",
+        "command": "out=$(npm test 2>&1); code=$?; printf '%s\\n' \"$out\" | tail -25; exit $code"
+      }
+    }
+  ]
+}

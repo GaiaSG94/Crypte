@@ -2,12 +2,21 @@
   "version": "v1",
   "hooks": [
     {
-      "name": "cargo-test-green",
+      "name": "clippy-zero-warnings",
       "trigger": "PostTaskExecution",
-      "timeout": 120,
+      "timeout": 300,
       "action": {
         "type": "command",
-        "command": "out=$(cargo test --quiet 2>&1); code=$?; printf '%s\\n' \"$out\" | tail -30; exit $code"
+        "command": "cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings 2>&1 | tail -5"
+      }
+    },
+    {
+      "name": "cargo-test-green",
+      "trigger": "PostTaskExecution",
+      "timeout": 300,
+      "action": {
+        "type": "command",
+        "command": "out=$(cargo test --manifest-path src-tauri/Cargo.toml 2>&1); code=$?; printf '%s\\n' \"$out\" | tail -30; exit $code"
       }
     }
   ]

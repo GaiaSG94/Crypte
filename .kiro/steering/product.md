@@ -2,37 +2,43 @@
 inclusion: always
 ---
 
-# Crypte — présentation produit
+# Crypt — product context
 
-**kiro-horror-tui** : un chat LLM dans une crypte hantée, TUI plein écran
-pensée pour **Ghostty**. Terminal ≥ 80x24 requis. UI et messages **en anglais**.
+**Crypt** is a chat for coding agents in a haunted crypt. The desktop app
+(Tauri v2 + Svelte 5) shows **where your agents work**: your projects are
+drawn as a 3D crypt in the background, folders are plates on the floor,
+files are stacks of slabs, and the ghost flies to whatever it touches.
 
-## Ce qu'est le produit
+The desktop app is the product judges install. A terminal version
+(`kiro-horror-tui`, ratatui + Ghostty) ships the same crypt, software
+rendered, on the branch `feat/project-space-3d`.
 
-- Multi-chats LLM (client OpenAI-compatible, `--muse-auth` via le store Muse),
-  chaque chat a son modèle (`/model`) ; niveau de raisonnement global (`/thinking`).
-- **Hub des esprits** : chaque chat est un fantôme blanc dans une crypte
-  isométrique (haut du panneau droit, affichage seul) ; les sous-agents sont
-  des petits fantômes noirs ; F5 = tout le monde fuit.
-- **Kiro la mascotte** : grand fantôme blanc qui hante l'écran chat et critique
-  chaque prompt (même modèle que le chat, ≤ 25 mots, sarcastique) ; cliquer =
-  le frapper (`/critic off` pour le reposer).
-- **Apparitions** qui réagissent au chat (chaudron, araignée, main du tombeau…),
-  effets horreur (vignette chaude, brouillard, éclairs), **jauge de peur** `fear`
-  (% de la fenêtre de contexte), compteur global de tokens, **almanach**
-  tokens/jour persisté (`/usage`).
-- **Créatures de Haunt** : 33 créatures + Kiro effrayé, pixel art 32×32 redessiné
-  (vraies images via protocole graphique Kitty).
-- **Haunt** (F9) : jeu de plateformes/tir original dans le style des créatures.
-- **Sous-agents** `/agent`, bus inter-chats (`/tell`, `/msg`, `/link`),
-  compaction `/compact`, recherche web `/web`, outils agent navigateur/bureau/shell.
-- **Compat Kiro** : lit les mêmes `.kiro/` que Kiro (steering, specs, hooks,
-  MCP, agents customs, skills, mémoire) — un projet va et vient entre les deux.
+UI and user-facing messages are **always in English**.
 
-## Ce que le produit n'est pas
+## What the product is
 
-- Pas de son : jamais de BEL, jamais de notification.
-- Pas un IDE : pas d'édition de fichiers, pas de terminal intégré.
-- Le TUI démarre même sans clé ni réseau (mode déconnecté, `/connect`).
+- **Multi-chat LLM client** (OpenAI-compatible providers), one model per
+  chat, global reasoning level.
+- **The 3D project space** (F7 / F8): every project you run is a district
+  of the crypt. F7 pulls the camera back over all of them, F8 toggles the
+  background.
+- **Kiro the mascot ghost**: haunts the chat panel and criticises your
+  prompts; click to hit him.
+- **Apparitions** reacting to the chat (cauldron, spider, tomb hand),
+  horror effects (warm vignette, fog, lightning), a **fear gauge**
+  (`fear`, % of the model context window), a **global** token counter.
+- **Haunt** (F9): an original platform/shooter minigame, pixel art.
+- **Sub-agents** `/agent`, inter-chat bus (`/tell`, `/msg`, `/link`),
+  compaction `/compact`, web search `/web`.
+- **Kiro compatibility**: Crypt reads the very same `.kiro/` as Kiro
+  (steering, specs, hooks, MCP, custom agents, skills, memory) — a project
+  moves back and forth between the two.
 
-Référence : #[[file:README.md]]
+## What the product is not
+
+- No sound: never a BEL, never a notification.
+- Not an IDE: no file editing, no embedded terminal.
+- The app starts **without a key and without network**: Haunt, the 3D space
+  and the demo mode work offline (`/connect` adds a provider later).
+
+Reference: #[[file:README.md]]

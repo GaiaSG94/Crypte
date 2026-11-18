@@ -7,7 +7,16 @@
       "matcher": "\\.rs$",
       "action": {
         "type": "command",
-        "command": "bad=$(grep -rn 'Color::Rgb([0-9]' src --include='*.rs' | grep -vE '^src/(theme|gfx|creatures)\\.rs:'); if [ -n \"$bad\" ]; then echo \"$bad\"; echo 'Couleur codee en dur hors palette : definir la couleur dans theme.rs (AGENTS.md Conventions)'; exit 1; fi"
+        "command": "bad=$(grep -rnE '\\[0x[0-9A-Fa-f]{2}, *0x[0-9A-Fa-f]{2}, *0x[0-9A-Fa-f]{2}\\]' src-tauri/src --include='*.rs' | grep -v 'src-tauri/src/theme.rs'); if [ -n \"$bad\" ]; then echo \"$bad\"; echo 'Hardcoded palette colour outside theme.rs: define the colour in src-tauri/src/theme.rs (AGENTS.md conventions)'; exit 1; fi"
+      }
+    },
+    {
+      "name": "no-hex-outside-palette",
+      "trigger": "PostFileSave",
+      "matcher": "\\.(svelte|css|ts)$",
+      "action": {
+        "type": "command",
+        "command": "bad=$(grep -rnE '#[0-9a-fA-F]{6}\\b' src/lib --include='*.svelte' --include='*.css' --include='*.ts' | grep -vE 'src/lib/crypte\\.css|src/lib/space/space\\.css|src/lib/contracts\\.ts|src/lib/space/types\\.ts|src/lib/screens/HauntView\\.svelte|src/lib/chat/FxOverlay\\.svelte|\\.test\\.ts' | grep -vE '^[^:]+:[0-9]+: *(\\*|//)'); if [ -n \"$bad\" ]; then echo \"$bad\"; echo 'Hardcoded colour outside the palette: use the --cry-* variables (src/lib/crypte.css) or the --space-* variables (src/lib/space/space.css)'; exit 1; fi"
       }
     }
   ]

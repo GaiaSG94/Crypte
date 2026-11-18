@@ -1,218 +1,91 @@
-# kiro-horror-tui — contexte agents
+# Crypt — agent context
 
-Chat LLM dans une crypte hantée (TUI ratatui) pensé pour Ghostty :
-multi-chats, hub des esprits (panneau droit, affichage seul), Kiro la
-mascotte en grand fantôme blanc qui hante l'écran chat et critique les
-prompts (`/critic`, clic = le frapper), créatures pixel art (panneau
-latéral, images Kitty), effets horreur, compteur tokens,
-almanach tokens/jour (`/usage`), sous-agents `/agent`,
-compaction `/compact`. UI et messages **en anglais**.
+Crypt is a chat for coding agents in a haunted crypt, as a **Tauri v2
+desktop app** (Rust backend + Svelte 5 frontend). The 3D crypt in the
+background shows where your agents work. UI and user-facing messages are
+**in English**.
 
-## Commandes
+The terminal version (`kiro-horror-tui`, ratatui + Ghostty) lives on the
+branch `feat/project-space-3d`; this file describes the **desktop app**.
+
+## Commands (from the repository root)
 
 ```sh
-cargo build                      # debug, 0 warning exigé
-cargo test                       # tous les tests doivent être verts
-cargo fmt --check                # formatage propre exigé
-./target/debug/kiro-horror-tui --smoke   # headless 80x24, sans réseau ni clé
-./target/debug/kiro-horror-tui --planche docs/bestiaire.png  # après retouche d'un sprite
-./target/debug/kiro-horror-tui --apercu /tmp/crypte.ans      # 4 écrans × 2 tailles en ANSI
-./target/debug/kiro-horror-tui --haunt-shot /tmp/haunt.png    # 4 frames du jeu (après retouche)
-cargo test --release -- --ignored frame_budget --nocapture    # coût d'une frame du jeu (240 i/s)
-./target/debug/kiro-horror-tui --muse-auth --once "Reply with exactly: OK"
-cargo build --release            # met à jour `kiro-horror-tui` (symlink)
-ghostty/crypte-test.sh           # dispatch lanceur (sur place vs fenêtre)
+npm install
+npm run check            # svelte-check (types) — 0 error expected
+npm test                 # vitest
+npm run build            # static frontend -> build/
+npm run tauri dev        # desktop app with hot reload
+
+cargo fmt --manifest-path src-tauri/Cargo.toml --check
+cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
+cargo test --manifest-path src-tauri/Cargo.toml
 ```
 
-## Archi (`src/`)
+Headless CLI of the same binary (no network, no key):
 
-`main.rs` (CLI + bootstrap), `app.rs` (état + boucle 10 ms, tick 100 ms),
-`app/ctors.rs` (constructeurs), `app/model.rs` (modèle effectif + thinking),
-`bus.rs` (adressage, files, liens auto, plafond 8 relais),
-`mouse.rs` (molette = défilement de l'historique ; clics : Kiro en
-balade = le frapper (bulle = la taire), [+] = nouveau chat, [×] =
-fermer, lignes sidebar = choisir, onglets = écrans ;
-drag bord sidebar = largeur colonne),
-`scroll.rs` (défilement : décalage depuis le bas + fenêtre visible),
-`drain.rs` (routage réponses async + pompes + retransmissions),
-`events.rs` (flux JSONL temps réel `--events-log`/`KH_EVENTS_LOG` :
-chats + sous-agents, silencieux si désactivé),
-`cmds.rs` (handlers `/…`), `cmds_web.rs` (handler `/web`),
-`cmds_link.rs` (handlers `/link`+`/unlink`),
-`cmds_vps.rs` (handlers `/vps` + écran VPS), `vps.rs` (profils
-`~/.config/kiro-horror-tui/vps.toml`, ssh, statuts distants),
-`commands.rs` (parse), `texts.rs` (aide),
-`settings.rs` + `settings/` (`/settings` : table des fournisseurs
-`known.rs`, coffre chiffre `store.rs` (ChaCha20-Poly1305, `0600`, cle
-maitre `master.key` ou `KH_SETTINGS_KEY`), ecran `ui.rs`, touches
-`keys.rs`),
-`permissions.rs` (mode yolo/auto + règles fines par outil + persistance
-+ `T5State`, handler + porte dans `permissions_cmds.rs`),
-`persist.rs` (chats : autosave JSON ~5 s + sortie, restauration silencieuse,
-fichier illisible préservé en `.corrupt`),
-`connect.rs` (handlers + flow `/connect` : statut, store Muse, clé masquée → modèle),
-`history.rs` (fenêtre d'envoi + nommage des chats),
-`question.rs` (bloc ```question : parse, rendu, réponse par chiffre),
-`sessions.rs` + `sessions/` (chats `chat.rs` + sous-agents `subagents.rs` +
-fermeture `close.rs`),
-`workspace.rs` (workspaces `<session>/agent`, zéro token),
-`sidebar.rs` (colonne cercueils + boutons [+] et [×]), `chat.rs` (historique +
-saisie + prompt custom masquable), `provider.rs` (client OpenAI-compatible, timeout 60 s),
-`tokens.rs` (estimation tiktoken + ledger), `agents.rs` (ce contexte :
-chargement, pin, compaction pure),
-`phantom.rs` + `phantom/` (Kiro en balade : humeurs + clics, `motion.rs`
-errance/recul/K.O., `draw.rs` sprite 32×32 via `ImageBank` + bulle +
-étoiles + BONK, jamais sur les cellules du sprite, `lines.rs` consigne
-de critique + répliques), `app/critic.rs` (critique = même modèle que
-le chat, `Incoming::Critique`, `/critic`, clics), `fx.rs`
-(overlay horreur), `app/ui.rs` (mise en page), `theme.rs` (palette
-unique), `creatures.rs` (sprites), `gfx.rs` (images), `apparition.rs`
-(panneau droit), `ghostty.rs` (OSC + mode 2026),
-`hub.rs` + `hub/` (hub des esprits : simulation en dalles, `iso.rs`
-crypte isométrique, `render.rs` scène, `live.rs` image Kitty par frame,
-`font.rs` police 3×5, `social.rs` orbes et bavardages), `app/esprits.rs`
-(panneau hub). Sprites du hub : `assets/hub/*.txt`.
-`canvas.rs` (peinture RGBA partagée hub + jeu : `px`, `put`, `blit`
-opacité/teinte/découpe). `haunt.rs` + `haunt/` (jeu F9, plateforme
-et tir, niveau 1 très difficile : Kiro envoie des tokens) : `level.rs`
-grille texte `assets/haunt/niveau-1.txt` (une lettre par dalle,
-dernière ligne = zones du directeur), `body.rs` physique en dalles,
-`player.rs` Kiro (linceul = armure), `foes.rs` créatures (mini-sprites
-6-18 px, dalles 6 px, vue 960×576 : un grand niveau de plateformes),
-`boss.rs` Faucheuse, `shots.rs` tokens/butin/cercueils flottants,
-`combat.rs`, `spawn.rs` repères + directeur + reprise, `backdrop.rs`
-ciel 32 bits + éclairage, `draw.rs` composition + présentation,
-`actors.rs`, `hud.rs`, `demo.rs` (`--haunt-shot`), `tests.rs`.
-Simulation à pas fixe **240 Hz** : vitesses/durées écrites en pas de
-référence de 1/30 s, toujours multipliées par `DT` / `SUB`.
-`app/haunt.rs` (écran, touches a/w/s/d + Espace, protocole clavier
-Kitty empilé seulement en jeu). Sprites du jeu : `assets/haunt/*.txt`.
-`hub/live.rs` : encodage PNG Kitty sur 3 fils (frames numérotées,
-jamais d'attente) — hub et jeu.
-`almanac.rs` (tokens par jour, bloc `/usage`) + `almanac/disk.rs`
-(JSON `~/.local/share/kiro-horror-tui/`, relu avant chaque écriture,
-jamais réécrit s'il est illisible).
-`web/` (`/web` : backends → fetch → cache → synthèse, parsing pur dans
-`web/parse.rs`, pertinence dans `web/rank.rs`).
-`tools/` (outils agent : `wire.rs` types OpenAI, `browser.rs`/`desktop.rs`
-argv purs, `exec.rs` exécution + timeout + journal, `flow.rs` boucle +
-confirmations y/n, `log.rs` JSONL tailles seules, `live.rs` tests live
-ignorés).
-`kiro/` (compat Kiro : `steering.rs`, `spec.rs` (+ T2 : noms,
-`check_task`), `hooks.rs`, `mcp.rs` (+ T4 : `cwd`/`headers`),
-`ignore.rs`, `status.rs`, `glob.rs`, `cmds.rs` (`/kiro`),
-`spec_cmds.rs` (`/spec` : handlers `new`/statut/`run` + drain, tests
-dans `spec_cmds/tests.rs`), `spec_prompts.rs` (prompts purs),
-`spec_run.rs` (`SpecGen`/`SpecRun`, purs), `mcp_client.rs`
-(protocole), `mcp_conn.rs` (stdio/HTTP + requête brute),
-`mcp_pool.rs` (parc, tests dans `mcp_pool/tests.rs`),
-`mcp_lists.rs` (resources/prompts : protocole + stub partagé),
-`mcp_cmds.rs` (`/mcp` : listes, `read`, `prompt` armé),
-`hook_match.rs` (regex `matcher`),
-`hook_run.rs` (moteur : sélection + tirs + file `agent`),
-`hook_exec.rs` (`sh -c` async + `HookOutcome`), `hook_cmds.rs`
-(`/hooks`), `frontmatter.rs` (partagé), `agents_md.rs` (customs)
-+ `agents_parse.rs` (parse `.json`/`.md` schéma Kiro),
-`skills.rs` + `skills_cmds.rs` (`/skills`, `/skill`),
-`checkpoint.rs` + `checkpoint_cmds.rs` (`/checkpoints`, `/rewind`),
-`memory.rs` + `memory_cmds.rs` (`/remember`), `cloud.rs` (sessions
-cloud : détection CLI, `argv` headless, parsers, git) +
-`cloud_cmds.rs` (`/cloud`, tests dans `cloud_cmds/tests.rs`) ;
-steering `always` + mémoire fusionnés au pin agents.md, voir
-`agents::load_merged_in`).
-`ghostty/` : thème, shader et lanceur `ghostty/crypte`.
+```sh
+cargo run --manifest-path src-tauri/Cargo.toml -- --smoke        # self-check
+cargo run --manifest-path src-tauri/Cargo.toml -- --sheet out.png # creature sheet
+cargo run --manifest-path src-tauri/Cargo.toml -- --apercu out.json
+cargo run --manifest-path src-tauri/Cargo.toml -- --mbox <args...> # broadcast CLI
+cargo run --manifest-path src-tauri/Cargo.toml -- --events-log f   # JSONL events
+```
 
-Flux : `send` (user → provider, tâche async, outillé si `/tools on` ;
-en parallèle `critique` → `Incoming::Critique` → bulle de Kiro, almanach
-seul, jamais l'historique) →
-`drain_replies` (`Incoming::Chat|Agent|Compact|Web|ToolDone`) → almanach
-(`Incoming::usage`, `None` pour `ToolDone`) + ledger + historique + affichage.
-Ctrl+C stoppe le vol du chat courant (`stop_chat` : époque bumpée, réponse
-tardive ignorée au `drain`, boucle outil annulée ; sans effet si rien en vol).
-Boucle outils : réponse avec `tool_calls` (sans limite de tours,
-jusqu'au texte final ; Ctrl+C annule) → file séquentielle → porte `tool_gate`
-(`permissions_cmds.rs` : règle fine `allow`/`ask`/`deny` par outil,
-exact + préfixe `*`, défaut = mode `yolo`/`auto` via
-`tools::needs_confirm` ; `deny` refuse sans y/n et prévient le modèle)
-→ `exec::run_tool` (binaires existants, timeout, sortie tronquée) →
-`Incoming::ToolDone` → résultats rejoués (`tool`, `tool_call_id`) →
-nouvel appel, jusqu'au texte final (seul persisté à l'historique ;
-guide transitoire `tools::GUIDE`).
-Bus : `/tell`/`/msg` déposent (affiché aussitôt, déclenché si libre,
-enfilé sinon, pompé en groupe à la tombée) ; `/agent @<n>` livre ailleurs
-(`Incoming::Agent(propriétaire, id, livraison)`, tag `[agent#id from Chat k]`,
-statut sur le propriétaire, ledger + versement contexte sur la livraison
-(rôle user, taggé, sans déclencher) ; `/ask` poursuit
-l'échange agent (enfilé si en cours, 20 messages max) ; `/link` retransmet
-chaque réponse en éventail (`[auto …]`, 8 relais max). Chaque chaîne reste
-d'origine user (commande ou lien) : pas de boucles infinies.
-`/compact` résume via le provider puis remplace l'historique par
-`[agents.md pinné?]` + `[résumé]` + 4 derniers (voir
-`agents::compacted_history`, pure et testée).
-Kiro : `.kiro/` projet + `~/.kiro/` lus comme Kiro (steering `always`
-→ pin, `/kiro` = statut). `/spec new` génère requirements → design →
-tasks (3 appels chaînés via `Incoming::SpecNew`, fichiers écrits au
-fil de l'eau) ; `/spec <nom>` = statut ; `/spec <nom> run` exécute
-les tâches via sous-agents `/agent` (requirements + design en
-contexte), tâche cochée sur disque à chaque tombée, `y/n` entre
-tâches en `auto` (voir `spec_waiting`), direct en `yolo`. T4 :
-client MCP tools (`enabled` connectés au premier besoin,
-`mcp_<serveur>_<outil>`, `autoApprove` sans confirmation, `/mcp` +
-`/mcp refresh`). T3 : moteur hooks (trigger + `matcher` regex +
-`.kiroignore` fichiers ; `command` = `sh -c` async 30 s via
-`Incoming::HookDone`, `agent` = prompt préfixé au prochain envoi ;
-tirs : envoi, outils, fichiers spec, tâches, agents, boot ;
-garde anti-récursion profondeur 1, `/hooks` = statut + récents).
-T5 : règles fines `/permissions <outil> <allow|ask|deny>` (`list`,
-`reset`, persistées à côté du mode), agents customs
-`.kiro/agents/` (format Kiro officiel : `.json`/`.md`, `prompt`,
-`model`, `tools`, `mcpServers`, `team/<nom>` ; listés par `/agents`,
-`/agent <nom> <texte>` avec prompt custom + modèle déclaré ;
-`tools`/`mcpServers` lus et affichés, non exécutés), skills
-`.kiro/skills/*/SKILL.md` (`/skills`,
-`/skill` préfixé à la saisie, transitoire), checkpoints
-(`write_tracked`, anneau 20, `/checkpoints`, `/rewind`),
-mémoire `.kiro/MEMORY.md` + globale (pin après steering,
-`/remember`). Kiro : complet (T1-T5).
-`/web` cherche (Tavily → Brave → DuckDuckGo → Wikipedia FR+EN) +
-fetch top-3 parallèle, synthèse LLM avec sources `[n]`
-(`Incoming::Web`, tag `[web:backend]`, brut si déconnecté,
-historique inchangé).
+## Architecture
+
+**Backend** (`src-tauri/src/`): `lib.rs` (wiring), `main.rs`, `state.rs`,
+`invoke.rs` + `tauri_more.rs` (commands), `bridge.rs`, `session_chat.rs`,
+`drain.rs` (async replies), `provider.rs` (OpenAI-compatible client),
+`settings.rs` + `vault.rs` (encrypted key store), `permissions.rs`
+(yolo/auto + fine rules), `theme.rs` (palette), `creatures.rs` (sprites),
+`phantom.rs` (mascot), `fx.rs` (horror overlay), `haunt.rs` + `haunt/`
+(minigame), `hub.rs` + `hub/` (spirit hub), `kiro/` (Kiro compatibility
+engine), `mbox/` (mailbox), `tools/` (agent tools), `web/` (`/web`),
+`space/` (3D space backend), `almanac.rs` (tokens per day), `cli.rs`.
+
+**Frontend** (`src/`): `routes/` (`/`, `/settings`, `/vps`, `/haunt`,
+`/mbox`, `/space`), `lib/contracts.ts` (the shapes shared with Rust),
+`lib/tauri.ts` (invoke/listen + browser fallback), `lib/fixtures.ts`
+(dev fixtures), `lib/crypte.svelte.ts` (shell state), `lib/chat/` (chat
+screen), `lib/space/` (the 3D crypt), `lib/components/`, `lib/screens/`,
+`lib/mbox/`, `lib/widgets/`, `lib/*.css` (the palette lives in
+`lib/crypte.css`).
+
+**The 3D space** is driven by one contract: `SceneEvent`, defined in
+`src/lib/space/types.ts` and mirrored in `src-tauri/src/space/events.rs`.
+Everything goes through `apply(state, event, now)` — never a second
+channel, never a direct patch of the scene.
+
+**Kiro compatibility**: the app reads the very same `.kiro/` as Kiro
+(project `./.kiro/` + global `~/.kiro/`): steering, specs, hooks, MCP,
+custom agents, skills, powers, checkpoints, memory. A project moves back
+and forth between Crypt and Kiro.
 
 ## Conventions
 
-- Fichier : 500 lignes max ET 30 fonctions max (tests inclus) ;
-  fonction < 50 lignes. Au-delà : découper en modules, jamais
-  laisser grossir. Vérifier : `wc -l` et
-  `grep -cE 'fn [a-zA-Z_][a-zA-Z0-9_]* *\('` sur les fichiers touchés.
-- Zéro duplication : extraire et partager les helpers, une seule
-  implémentation par logique (`compacted_history`, `without_pinned`,
-  `usage_line` vivent dans `agents.rs`).
-- PR : ne jamais rebase parce que `main` a bougé — `refresh-prs` le fait
-  (rebase serveur à chaque push sur `main`) ; vrai conflit → label
-  `hermes/conflit` + commentaire auto, à résoudre à la main.
-- `.kiro/` : mêmes fichiers que Kiro (workspace + global) ; tests via
-  chemins injectés UNIQUEMENT (jamais `set_var` : un seul site
-  historique, `spec_bout_en_bout`, fixture sans steering ni MCP) ;
-  `KH_KIRO_*` = overrides manuels du binaire ; en test, global=None
-  par défaut (jamais `~/.kiro` réel).
-- Couleurs : uniquement via `theme.rs` (jamais de `Color::Rgb` ailleurs,
-  sauf les fonds RGBA de `gfx.rs` et `creatures.rs`, documentés = `theme::VOID`).
-- Kiro en balade : sprites `assets/pixel/kiro-*.txt` (fantôme blanc du
-  hub en 32×32 ; `kiro-ko` = `kiro-frappe` retourné, testé) ; arène =
-  sidebar + discussion (jamais le panneau droit ni sous la saisie) ;
-  aucune écriture dans le rectangle du sprite (placeholders Kitty).
-- Pixel art : grilles `assets/pixel/*.txt` 32×32, lettres de palette
-  (voir README) ; mise à l'échelle **entière** au plus proche voisin
-  seulement (`creatures::fit`), jamais de filtre lissant : la netteté est
-  testée (`gfx::tests`). Après retouche : régénérer `docs/bestiaire.png`.
-- Effets (`fx.rs`) : jamais sur le texte ni dans les zones d'images
-  (`ImageBank::drawn`). Aucun son (pas de BEL, pas de notification).
-- UI et messages en anglais ; clé API **jamais affichée ni logguée**
-  (ni chat, ni log, ni test — les tests réseau lisent le store). Au
-  repos : coffre `/settings` chiffré (ChaCha20-Poly1305, `0600`), saisie
-  masquée `•`, clé maître locale (`master.key`) ou `KH_SETTINGS_KEY`.
-- `AGENTS.md` lu une seule fois, au premier envoi (`--agents-file` prime,
-  sinon `./AGENTS.md` puis `./AGENT.md`, jamais relu ensuite) ;
-  injecté en tête de chaque chat + `/agent` ; exclu de `/compact`
-  (résumé méta) et de `--once` (brut).
+- File: 500 lines max AND 30 functions max (tests included); function < 50
+  lines. Beyond that: split into modules, never let a file grow. Check
+  `wc -l` and the function count on every file you touch.
+- Zero duplication: one implementation per logic, extract and share the
+  helpers.
+- Colours only through the palette: Rust constants of
+  `src-tauri/src/theme.rs`, CSS custom properties of `src/lib/crypte.css`
+  (`--cry-*`) and `src/lib/space/space.css` (`--space-*`).
+- UI and user-facing strings in **English**. The code and the comments may
+  be in any language.
+- Effects (`fx.rs`, `FxOverlay.svelte`): never on the text, never over the
+  image areas. **No sound** (no BEL, no notification).
+- Pixel art: text grids `src-tauri/assets/**/*.txt`, palette letters only;
+  scaling is **integer nearest-neighbour** only (`creatures::fit`), never a
+  smoothing filter.
+- The API key is **never displayed nor logged** (not in the chat, not in a
+  log, not in a test). At rest: encrypted vault ChaCha20-Poly1305 (`0600`),
+  masked input, master key `master.key` or `KH_SETTINGS_KEY`.
+- `.kiro/`: tests through injected paths only (never `set_var`); `KH_KIRO_*`
+  = manual binary overrides; in tests, global = `None` (never the real
+  `~/.kiro`).
+- Pull request: never rebase because `main` moved — `refresh-prs` does it
+  (server-side rebase on every push on `main`); a real conflict = label
+  `hermes/conflit` + automatic comment, resolved by hand. The merge queue
+  is Mergify (squash, update by merge).

@@ -1,32 +1,33 @@
 ---
 inclusion: fileMatch
 fileMatchPattern:
-  - "assets/**/*.txt"
-  - "src/creatures.rs"
-  - "src/gfx.rs"
-  - "src/canvas.rs"
-  - "src/apparition.rs"
-  - "src/hub/**"
-  - "src/haunt/**"
-  - "src/phantom/**"
+  - "src-tauri/assets/**/*.txt"
+  - "src-tauri/src/creatures.rs"
+  - "src-tauri/src/haunt/sprites.rs"
+  - "src-tauri/src/apparition.rs"
+  - "src-tauri/src/cmd_creatures.rs"
+  - "src/lib/pixel.ts"
 ---
 
-# Crypte — pixel art et rendu
+# Crypt — pixel art and rendering
 
-- Grilles texte : `assets/pixel/<slug>.txt` = 32 lignes de 32 lettres,
-  `.` = transparent, sinon lettre de palette `src/theme.rs`
-  (`W` os, `S` sable, `U` ombre, `K` encre, `O`/`o` citrouille,
-  `R`/`r` sang, `G`/`g` ectoplasme, `P`/`p` spectre, `Y`/`y` bougie,
-  `N` toile). Sprites du hub : `assets/hub/*.txt`. Sprites du jeu :
-  `assets/haunt/*.txt` (mini-sprites 6–18 px, dalles 6 px).
-- Rendu net garanti : upscale **entier** au plus proche voisin sur un canvas
-  à la taille pixel exacte (`creatures::fit`) — 1 pixel image = 1 pixel écran
-  en Kitty, = 1 demi-cellule en halfblocks. Jamais de filtre lissant
-  (la netteté est testée dans `gfx::tests`).
-- Ghostty : image Kitty réémise chaque frame sous le même id (PNG, ×2–×6
-  au plus proche) ; ailleurs : halfblocks truecolor.
-- Après toute retouche de sprite : régénérer `docs/bestiaire.png`
-  (`--sheet docs/bestiaire.png`) et vérifier `--preview` / `--haunt-shot`.
-- Kiro KO = sprite `kiro-frappe` retourné (testé) ; ne jamais écrire dans le
-  rectangle du sprite en balade (placeholders Kitty) ni appliquer `fx.rs`
-  sur le texte ou les zones d'images.
+- Text grids: `src-tauri/assets/pixel/<slug>.txt` = 32 lines of 32
+  letters, `.` = transparent, otherwise a palette letter from
+  `src-tauri/src/theme.rs` (`W` bone, `S` sand, `U` shade, `K` ink,
+  `O`/`o` pumpkin, `R`/`r` blood, `G`/`g` ectoplasm, `P`/`p` spectre,
+  `Y`/`y` candle, `N` burlap). Hub sprites: `assets/hub/*.txt`. Game
+  sprites: `assets/haunt/*.txt` (mini-sprites 6–18 px, 6 px tiles).
+- Guaranteed sharp rendering: **integer** nearest-neighbour scaling on a
+  canvas of the exact pixel size (`creatures::fit`) — 1 image pixel = 1
+  screen pixel in Kitty, = 1 half-cell in halfblocks. Never a smoothing
+  filter (the sharpness is tested: `creatures::tests`,
+  `src/lib/pixel.test.ts`).
+- In the desktop app the frontend gets PNGs from the backend
+  (`creature_get`, `cmd_creatures.rs`); `src/lib/pixel.ts` keeps the
+  grid-to-canvas conversion tested on the frontend side too.
+- Kiro KO = the `kiro-frappe` sprite flipped (tested); never write inside
+  the mascot sprite rectangle, and never apply the horror overlay
+  (`fx.rs`) on text or image areas.
+- After every sprite touch: regenerate `docs/bestiaire.png`
+  (`cargo run --manifest-path src-tauri/Cargo.toml -- --sheet
+  docs/bestiaire.png`) and check the render.

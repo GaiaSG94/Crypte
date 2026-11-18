@@ -2,37 +2,71 @@
 inclusion: always
 ---
 
-# Crypte — stack technique
+# Crypt — technical stack
 
-- **Rust** (édition 2021, MSRV 1.74), binaire unique `kiro-horror-tui`.
-- **TUI** : `ratatui` 0.29 + `crossterm` 0.28 ; boucle 10 ms, tick 100 ms.
-- **Images** : protocole graphique Kitty (placeholders Unicode) via
-  `ratatui-image` + `image` (PNG seul) ; repli halfblocks truecolor hors Ghostty.
-- **Réseau** : `reqwest` rustls, client OpenAI-compatible maison (`provider.rs`,
-  timeout 60 s) ; estimation locale des tokens via `tiktoken-rs`.
-- **Chiffrement** : `chacha20poly1305` (coffre des clés API).
-- **Dépendances minimales** : chaque feature cargo est justifiée dans
-  #[[file:Cargo.toml]] — ne pas ajouter de crate ou de feature sans le prouver
-  par `grep` + `cargo check`, et documenter le choix en commentaire.
+- **Backend**: Rust 2021, **Tauri v2** (`src-tauri/`), crate `crypte`,
+  lib `crypte_lib`. ~75 `#[tauri::command]`s, two event channels
+  (`crypte-event`, `crypte-ui`) plus the space channel (`space-event`).
+- **Frontend**: **SvelteKit 2** in static SPA mode (`ssr = false`),
+  **Svelte 5** runes, Vite, TypeScript strict, **Vitest**, SvelteKit
+  adapter-static (`build/`).
+- **3D**: **three.js r187** (`src/lib/space/`): scene, world, layout,
+  state. The world is driven by the `SceneEvent` contract, shared with
+  the Rust side (`src-tauri/src/space/events.rs`).
+- **Network**: `reqwest` with rustls, hand-written OpenAI-compatible
+  client (`provider.rs`, 60 s timeout), local token estimation with
+  `tiktoken-rs`.
+- **Encryption**: `chacha20poly1305` (encrypted vault for API keys).
+- **Fonts**: `@fontsource/geist-mono` + `@fontsource/geist-sans`, bundled
+  (the app works offline).
+- **Minimal dependencies**: every cargo feature must be justified in
+  #[[file:src-tauri/Cargo.toml]] — do not add a crate or a feature without
+  proving it with `grep` + a build, and say why in a comment.
 
-## Commandes (tout doit être vert avant de rendre)
+## Commands (everything must be green before handing off)
+
+Run from the **repository root**:
 
 ```sh
-cargo build                      # 0 warning exigé
-cargo test                       # tous verts
-cargo fmt --check                # formatage propre exigé
-./target/debug/kiro-horror-tui --smoke   # rendu headless 80x24, sans réseau ni clé
+npm install
+npm run check            # svelte-check (types) — 0 errors
+npm test                 # vitest
+npm run build            # static frontend -> build/
+cargo fmt --manifest-path src-tauri/Cargo.toml --check
+cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
+cargo test --manifest-path src-tauri/Cargo.toml
 ```
 
-Autres modes print-only (toujours sur place, jamais de fenêtre) : `--help`,
-`--once "<texte>"`, `--sheet`, `--preview`, `--demo`, `--haunt-shot`.
-`ghostty/crypte` = lanceur (sur place si le terminal peut, sinon fenêtre
-Ghostty habillée) ; `ghostty/crypte-test.sh` = tests du dispatch.
+Rust-only commands can also be run from `src-tauri/` (that is what CI
+does). CI additionally enforces a 5-minute budget per job
+(`ci-budget`).
 
-## Exigences non négociables
+Headless CLI of the same binary (no network, no key):
 
-- **0 warning** (`cargo build`), **0 test rouge**, **`cargo fmt` propre**.
-- Après retouche d'un sprite : régénérer `docs/bestiaire.png`
-  (`--sheet`) et vérifier `--haunt-shot` pour le jeu.
-- Ne jamais compiler ni lancer le TUI interactif dans un terminal non
-  compatible : `--smoke` suffit pour valider un rendu.
+```sh
+npm run tauri dev        # desktop app with hot reload
+cargo run --manifest-path src-tauri/Cargo.toml -- --smoke
+cargo run --manifest-path src-tauri/Cargo.toml -- --sheet out.png
+cargo run --manifest-path src-tauri/Cargo.toml -- --apercu out.json
+```
+
+## Releases and platforms
+
+- One GitHub Release publishes **the desktop app for the 3 platforms**
+  (Windows `.msi`, macOS `.dmg` universal, Linux `.AppImage`) **plus the
+  terminal binaries** (Linux/macOS tarballs, built from the branch
+  `feat/project-space-3d`).
+- The release is triggered by a push on `main` that touches
+  `.github/release-request.json` (tag + title in the file), workflow
+  `.github/workflows/release.yml`.
+- The site (GitHub Pages, branch `gh-pages`) always points to
+  `releases/latest`: never hardcode a version number in a link.
+
+## Non-negotiable requirements
+
+- **0 warning** (`cargo clippy -- -D warnings`), **0 failing test**
+  (`cargo test` + `npm test`), **`cargo fmt --check` clean**,
+  **0 svelte-check error**.
+- After touching a sprite: regenerate the sheet and check the game shot.
+- Never launch the interactive UI in an incompatible terminal: the
+  headless `--smoke` mode is enough to validate a render.

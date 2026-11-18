@@ -1,30 +1,38 @@
 ---
 inclusion: fileMatch
 fileMatchPattern:
-  - "src/kiro/**"
+  - "src-tauri/src/kiro/**"
 ---
 
-# Crypte — moteur de compat `.kiro/`
+# Crypt — the `.kiro/` compatibility engine
 
-Crypte lit les mêmes `.kiro/` que Kiro (projet `./.kiro/` + global `~/.kiro/`,
-complet T1–T5) : steering (`steering.rs`), specs (`spec*.rs`, `/spec new` =
-3 appels chaînés requirements → design → tasks, `run` via sous-agents),
-hooks (`hook_*.rs`, trigger + regex `matcher` + `.kiroignore`, `command` =
-`sh -c` async 30 s, `agent` = prompt préfixé au prochain envoi), MCP
-(`mcp*.rs`, outils seuls, `mcp_<serveur>_<outil>`), agents customs
-(`agents_*.rs`, format Kiro officiel `.json`/`.md`, `team/<nom>`, projet >
-global, json > md ; `tools`/`mcpServers` lus et affichés, non exécutés),
-skills (`skills*.rs`, `/skill` transitoire), checkpoints (`checkpoint*.rs`,
-anneau 20 via `write_tracked`), mémoire (`memory*.rs`, pin après steering).
+Crypt reads the very same `.kiro/` as Kiro (project `./.kiro/` plus the
+global `~/.kiro/`, complete T1→T5): steering (`steering.rs`), specs
+(`spec.rs`, `spec_prompts.rs`, `spec_runner.rs`; `/spec new` = 3 chained
+calls requirements → design → tasks, `run` through sub-agents), hooks
+(`hooks.rs`, `hook_match.rs`, `hook_run.rs`, `hook_exec.rs`: trigger +
+regex `matcher` + `.kiroignore`; `command` = `sh -c` async 30 s, `agent`
+= prompt prefixed to the next message), MCP (`mcp*.rs`: tools only,
+`mcp_<server>_<tool>`), custom agents (`agents_md.rs`, `agents_parse.rs`:
+official Kiro format `.json`/`.md`, `team/<name>`, project beats global,
+json beats md; `tools`/`mcpServers` are read and displayed, not executed),
+skills (`skills.rs`: `/skill` is transient), powers (`powers.rs`),
+checkpoints (`checkpoint.rs`, ring of 20 via `write_tracked`), memory
+(`memory.rs`, pinned after the steering).
 
-## Règles de test strictes
+## Strict test rules
 
-- Chemins **injectés uniquement** : jamais `set_var` (un seul site historique,
-  `spec_bout_en_bout`, fixture sans steering ni MCP).
-- `KH_KIRO_*` = overrides manuels du binaire uniquement.
-- En test : global = `None` par défaut (jamais le vrai `~/.kiro`).
-- Steering `always` + mémoire fusionnés au pin agents.md
-  (voir `agents::load_merged_in`) ; `.kiroignore` : dernier motif qui matche
-  gagne, `!` ré-inclut, `dir/` = sous-arbre.
-- Specs existantes jamais écrasées ; tâche en échec = run arrêté, rien re-tenté ;
-  hooks boot = single-fire, garde anti-récursion profondeur 1.
+- **Injected paths only**: never `set_var` (single historical site,
+  `spec_bout_en_bout`, fixture without steering nor MCP).
+- `KH_KIRO_*` = manual binary overrides only.
+- In tests: global = `None` by default (never the real `~/.kiro`).
+- `always` steering + memory merged into the pinned agents.md
+  (see `agents::load_merged_in`); `.kiroignore`: the last matching
+  pattern wins, `!` re-includes, `dir/` = subtree.
+- Existing specs are never overwritten; a failed task stops the run, no
+  retry; boot hook = single-fire, anti-recursion guard of depth 1.
+
+Because Crypt implements this engine, **the `.kiro/` directory of this
+repository is read by the product itself**: keep the formats valid
+(front matter, trigger names, matcher regexes) and the commands runnable
+from the repository root.

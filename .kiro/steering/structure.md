@@ -2,46 +2,72 @@
 inclusion: always
 ---
 
-# Crypte — structure et conventions
+# Crypt — structure and conventions
 
-## Règles de taille (bloquantes)
+## Size rules (blocking)
 
-- Fichier source : **500 lignes max ET 30 fonctions max** (tests inclus ;
-  compter par `grep -cE 'fn [a-zA-Z_][a-zA-Z0-9_]* *\('`).
-- Fonction : **moins de 50 lignes**.
-- Au-delà : découper en modules, jamais laisser grossir. Vérifier `wc -l` +
-  comptage `fn` sur chaque fichier touché avant de rendre.
+- Source file: **500 lines max AND 30 functions max** (tests included;
+  count with `grep -cE 'fn [a-zA-Z_][a-zA-Z0-9_]* *\('` for Rust, and
+  `grep -cE '^\s*(export )?(async )?function '` for TypeScript).
+- Function: **less than 50 lines**.
+- Beyond that: split into modules, never let a file grow. Check `wc -l`
+  plus the function count on every file you touch before handing off.
+
+## Layout (this repository)
+
+```
+src-tauri/            Rust backend (Tauri v2), crate `crypte` (lib `crypte_lib`)
+  Cargo.toml          workspace + package manifest (versions live here)
+  tauri.conf.json     window, bundle, version
+  assets/             pixel art: assets/pixel, assets/hub, assets/haunt
+  src/                Rust sources (see below)
+src/                  SvelteKit 2 frontend (static SPA, ssr = false)
+  routes/             / (chat), /settings, /vps, /haunt, /mbox, /space
+  lib/
+    contracts.ts      the shapes shared with Rust (single source)
+    tauri.ts          invoke/listen wrappers + browser fallback
+    fixtures.ts       browser fixtures (dev only, never a secret)
+    crypte.svelte.ts  shell state (tabs, fear, overlays, toasts)
+    chat/             chat screen: store.ts, ChatView, Sidebar, ChatInput…
+    space/            the 3D crypt: scene.ts, layout.ts, state.ts, tabs.ts
+    components/       shared widgets (ConnectModal, FearGauge, Header…)
+    screens/          Settings, Vps, Haunt views
+    mbox/             mailbox panel
+    widgets/          design system (CrypteButton, CrypteTabs, …)
+    *.css             palette + layout (crypte.css is the palette root)
+.kiro/                steering, hooks, agents, skills, specs, workflows
+docs/                 design docs, captures, VPS/CLOUD/mbox docs
+.github/workflows/    CI (Rust + frontend), release (3 OS), Mergify helpers
+```
+
+Rust modules (`src-tauri/src/`): `lib.rs` (wiring), `main.rs`, `state.rs`,
+`invoke.rs` / `tauri_more.rs` (commands), `bridge.rs`, `session_chat.rs`,
+`drain.rs`, `provider.rs` (OpenAI-compatible client), `settings.rs` +
+`vault.rs` (encrypted key store), `permissions.rs` (yolo/auto + fine rules),
+`theme.rs` (palette), `creatures.rs` (sprites), `phantom.rs` (mascot),
+`fx.rs` (horror overlay), `haunt.rs` + `haunt/` (minigame), `hub.rs` +
+`hub/` (spirit hub), `kiro/` (Kiro compatibility engine), `mbox/` (mailbox),
+`tools/` (agent tools), `web/` (`/web`), `space/` (3D space backend),
+`almanac.rs` (tokens per day), `cli.rs` (headless CLI).
 
 ## Conventions
 
-- **Zéro duplication** : une seule implémentation par logique ; extraire et
-  partager les helpers (`compacted_history`, `without_pinned`, `usage_line`
-  vivent dans `agents.rs`).
-- **Couleurs uniquement via `theme.rs`** : jamais de `Color::Rgb` ailleurs
-  (sauf fonds RGBA de `gfx.rs`/`creatures.rs`, documentés = `theme::VOID`).
-- **UI et messages en anglais.** Le code et les commentaires acceptent le
-  français ; les chaînes visibles par l'utilisateur sont en anglais.
-- **Effets (`fx.rs`)** : jamais sur le texte ni dans les zones d'images
-  (`ImageBank::drawn`). Aucun son.
-- **Kiro en balade** : sprites `assets/pixel/kiro-*.txt`, arène = sidebar +
-  discussion (jamais le panneau droit ni sous la saisie) ; aucune écriture
-  dans le rectangle du sprite (placeholders Kitty).
-- **Pixel art** : grilles `assets/pixel/*.txt` 32×32, lettres de palette
-  (voir README) ; upscale **entier** au plus proche voisin seulement
-  (`creatures::fit`), jamais de filtre lissant.
-- `AGENTS.md` chargé une seule fois au premier envoi, pinné en tête de chaque
-  chat + `/agent`, exclu de `/compact` (résumé méta) et de `--once` (brut).
+- **Zero duplication**: one implementation per logic; extract and share the
+  helpers.
+- **Colours only from the palette**: Rust colours live in `theme.rs`
+  (`Rgb` constants); CSS colours live in the custom properties of
+  `src/lib/crypte.css`. Never hardcode an RGB literal elsewhere.
+- **UI and user-facing strings in English.** Code comments may be in any
+  language; what the user reads is English.
+- **Effects (`fx.rs`, CSS overlays)**: never on the text, never over the
+  image areas. No sound at all.
+- **Pixel art**: text grids `src-tauri/assets/**/*.txt`, palette letters
+  only; scaling is **integer nearest-neighbour** only (`creatures::fit`),
+  never a smoothing filter.
+- **The 3D space** is driven by a single event contract (`SceneEvent`),
+  mirrored between `src/lib/space/types.ts` and
+  `src-tauri/src/space/events.rs`. Never invent a second channel.
+- **`AGENTS.md`** is read once, pinned in every chat, and excluded from
+  compaction.
 
-## Archi (`src/`, carte complète)
-
-#[[file:AGENTS.md]]
-
-Repères : `main.rs` (CLI + bootstrap) → `app.rs` (état + boucle) →
-`sessions.rs` + `sessions/` (chats + sous-agents) ; `drain.rs` route les
-réponses async ; `cmds*.rs` = handlers `/…` ; `chat/` = historique + saisie ;
-`hub/` + `app/esprits.rs` = hub des esprits ; `haunt/` + `app/haunt.rs` =
-jeu F9 ; `kiro/` = compat Kiro ; `tools/` = outils agent ; `web/` = `/web` ;
-`settings/` = fournisseurs + coffre ; `almanac.rs`, `tokens.rs`,
-`provider.rs`, `theme.rs`, `creatures.rs`, `gfx.rs`, `canvas.rs`, `fx.rs`,
-`ghostty.rs`, `bus.rs`, `mouse.rs`, `scroll.rs`, `history.rs`, `question.rs`,
-`permissions*.rs`, `persist.rs`, `connect.rs`, `vps.rs`, `workspace.rs`.
+The full map of the repository is in #[[file:AGENTS.md]].

@@ -1,6 +1,6 @@
 {
   "name": "crypte-sprite",
-  "description": "Cree un sprite de la Crypte : plan de grille, dessin, regeneration des planches et tests.",
+  "description": "Creates a Crypt sprite: grid plan, drawing, sheet regeneration and tests.",
   "inputs": {
     "creature": "prompt"
   },
@@ -9,22 +9,22 @@
       "type": "step",
       "id": "plan",
       "agent": "wf-planner",
-      "prompt": "Propose le plan d'un sprite pour : {{creature}}. Choisis l'ecran (créatures 32x32, hub, ou jeu Haunt), le slug de fichier, et la grille complete lettre par lettre avec la palette du README (W S U K O o R r G g P p Y y N, . transparent). N'edite aucun fichier source. Ecris le plan dans .kiro/workflow-output/sprite-plan.md. Termine par send_message severity success avec le plan en resume. Reponds en francais.",
+      "prompt": "Propose the plan of a sprite for: {{creature}}. Choose the screen (creatures 32x32, hub, or the Haunt game), the file slug, and the complete grid letter by letter with the palette of the README (W S U K O o R r G g P p Y y N, . transparent). Do not edit any source file. Write the plan in .kiro/workflow-output/sprite-plan.md. End with send_message severity success and the plan as a summary. Answer in English.",
       "artifacts": {
         "plan": ".kiro/workflow-output/sprite-plan.md"
       }
     },
     {
       "type": "step",
-      "id": "dessiner",
+      "id": "draw",
       "agent": "crypte-pixel-artiste",
-      "prompt": "Plan propose :\n\n{{plan.output}}\n\n(Fichier : {{artifacts.plan}}.) Dessine le sprite exactement selon ce plan : ecris la grille dans assets/, respecte 32 lignes de 32 lettres pour les créatures, verifie chaque lettre contre la palette, puis regenere docs/bestiaire.png (--planche). Termine par send_message severity success avec slug, dimensions et ecran cible."
+      "prompt": "Proposed plan:\n\n{{plan.output}}\n\n(File: {{artifacts.plan}}.) Draw the sprite exactly as planned: write the grid in `src-tauri/assets/`, keep 32 lines of 32 letters for the creatures, check every letter against the palette, then regenerate `docs/bestiaire.png` (`cargo run --manifest-path src-tauri/Cargo.toml -- --sheet docs/bestiaire.png`). End with send_message severity success with the slug, the dimensions and the target screen. Answer in English."
     },
     {
       "type": "step",
-      "id": "verifier",
+      "id": "verify",
       "agent": "wf-coder",
-      "prompt": "Sprite dessine :\n\n{{dessiner.output}}\n\nVerifie : `./target/debug/kiro-horror-tui --apercu /tmp/crypte.ans`, `--haunt-shot /tmp/haunt.png` si le jeu est concerne, puis `cargo test` (la nettete est testee dans gfx::tests). Corrige si besoin. Termine par send_message severity success avec les resultats observes. Reponds en francais."
+      "prompt": "Sprite drawn:\n\n{{draw.output}}\n\nVerify: `cargo run --manifest-path src-tauri/Cargo.toml -- --apercu /tmp/crypte.ans`, `--haunt-shot /tmp/haunt.png` if the game is concerned, then `cargo test --manifest-path src-tauri/Cargo.toml` (the sharpness is tested in `creatures::tests` and `src/lib/pixel.test.ts`). Fix if needed. End with send_message severity success and the observed results. Answer in English."
     }
   ]
 }

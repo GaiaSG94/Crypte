@@ -1,48 +1,44 @@
 ---
 name: pixel-art
-description: Ajouter ou retoucher un sprite pixel art 32x32 des créatures (grilles assets/pixel/*.txt, lettres de palette, mise à l'échelle entière). Utiliser pour tout nouveau monstre, retouche de sprite, régénération de la planche des créatures ou rendu Kitty.
+description: Add or retouch a 32x32 pixel-art sprite of the creatures (text grids in src-tauri/assets/pixel/*.txt, palette letters, integer scaling). Use for any new monster, sprite retouch, creature sheet regeneration or Kitty rendering.
 ---
 
-# Pixel art des créatures
+# Pixel art of the creatures
 
-Chaque créature est UNE grille texte `assets/pixel/<slug>.txt` : 32 lignes
-de 32 lettres, `.` = transparent, sinon une lettre de la palette
-(`src/theme.rs`, voir README) :
+Each creature is ONE text grid `src-tauri/assets/pixel/<slug>.txt`: 32 lines
+of 32 letters, `.` = transparent, otherwise a palette letter
+(`src-tauri/src/theme.rs`, see README):
 
-- `W` os, `S` sable, `U` ombre, `K` encre
-- `O`/`o` citrouille / sombre, `R`/`r` sang / séché
-- `G`/`g` ectoplasme / sombre, `P`/`p` spectre / sombre
-- `Y`/`y` bougie / sombre, `N` toile de jute
+- `W` bone, `S` sand, `U` shade, `K` ink
+- `O`/`o` pumpkin / dark, `R`/`r` blood / dried
+- `G`/`g` ectoplasm / dark, `P`/`p` spectre / dark
+- `Y`/`y` candle / dark, `N` burlap
 
-## Règles impératives
+## Imperative rules
 
-1. 32 lignes exactement, 32 caractères exactement par ligne (vérifier avec
-   `awk '{ print length }' assets/pixel/<slug>.txt | sort -u`).
-2. Lettres de palette uniquement + `.` (aucune autre lettre).
-3. Couleurs uniquement via `theme.rs` côté code (jamais de `Color::Rgb`
-   ailleurs que `gfx.rs`/`creatures.rs` pour les fonds documentés).
-4. Mise à l'échelle **entière** au plus proche voisin seulement
-   (`creatures::fit`) : jamais de filtre lissant, la netteté est testée
-   (`gfx::tests`).
-5. Kiro en balade : sprites `assets/pixel/kiro-*.txt` (`kiro-ko` =
-   `kiro-frappe` retourné, testé) ; ne jamais écrire dans le rectangle
-   du sprite (placeholders Kitty) ni sous la saisie.
-6. Effets (`fx.rs`) : jamais sur le texte ni dans les zones d'images
-   (`ImageBank::drawn`). Aucun son (pas de BEL).
-7. Ne jamais copier d'image d'origine : tout sprite est redessiné
-   (les créatures actuel est redessiné d'après une planche Dribbble,
-   aucune image d'origine dans le dépôt).
+1. Exactly 32 lines, exactly 32 characters per line (check with
+   `awk '{ print length }' src-tauri/assets/pixel/<slug>.txt | sort -u`).
+2. Palette letters and `.` only (no other letter).
+3. Colours only through the palette (`src-tauri/src/theme.rs` for Rust, the
+   `--cry-*` variables for CSS). No hardcoded RGB elsewhere.
+4. **Integer** nearest-neighbour scaling only (`creatures::fit`): never a
+   smoothing filter, the sharpness is tested (`creatures::tests`,
+   `src/lib/pixel.test.ts`).
+5. The mascot KO sprite is the `kiro-frappe` grid flipped (tested); never
+   write inside the sprite rectangle.
+6. Effects (`fx.rs`, `FxOverlay.svelte`): never on the text, never over the
+   image areas. No sound (no BEL).
+7. Never copy an original image: every sprite is redrawn.
 
-## Après toute retouche
+## After each retouch
 
 ```sh
-cargo build   # 0 warning exigé
-cargo test    # tout vert exigé
-./target/debug/kiro-horror-tui --planche docs/bestiaire.png  # régénère la planche
-./target/debug/kiro-horror-tui --smoke   # rendu headless 80x24, sans réseau ni clé
+cargo test --manifest-path src-tauri/Cargo.toml                              # green
+cargo run --manifest-path src-tauri/Cargo.toml -- --sheet docs/bestiaire.png  # regenerate the sheet
+cargo run --manifest-path src-tauri/Cargo.toml -- --smoke                     # headless render, no network, no key
 ```
 
-Autres grilles du même esprit (mêmes règles de netteté) :
-sprites du hub `assets/hub/*.txt`, sprites du jeu `assets/haunt/*.txt`
-(+ `--haunt-shot /tmp/haunt.png` après retouche, niveau
-`assets/haunt/niveau-1.txt` testé comme atteignable).
+Other grids of the same kind (same sharpness rules): the hub sprites
+`src-tauri/assets/hub/*.txt`, the game sprites
+`src-tauri/assets/haunt/*.txt` (+ `--haunt-shot /tmp/haunt.png` after a
+retouch, level `src-tauri/assets/haunt/niveau-1.txt` tested as reachable).
