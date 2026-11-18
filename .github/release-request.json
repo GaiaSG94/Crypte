@@ -1,5 +1,5 @@
 {
-  "tag": "v1.0.3",
+  "tag": "v1.0.4",
   "status": "pending",
-  "comment": "Publication v1.0.3 : demos hors-ligne (Try the demo), onglets V2.1, suite verte sous Windows (469 + 47 tests), property-based testing, .kiro reeligne en anglais, spec vivante project-space-3d, README pour les juges + docs/KIRO.md, power d exemple, nettoyage des chemins personnels. Declenche release.yml sur main (bundles Tauri 3 OS + binaires TUI, GitHub Release). status=published apres succes."
+  "comment": "Publication v1.0.4 : demo hors-ligne (#175), README juges + docs/KIRO.md (#178), power d exemple (#179), audit chemins personnels (#184), onglets V2.1 (#170), portabilite Windows (#171), PBT (#174), .kiro reeligne en anglais (#173). Le tag v1.0.3 existe (run 44361376331 echoue sans rien publier) : ne pas reutiliser. A merger APRES #175/#178/#179/#184. status=published apres succes."
 }

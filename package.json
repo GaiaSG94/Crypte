@@ -1,6 +1,6 @@
 {
   "name": "crypte",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A chat for coding agents in a haunted crypt: see where your agents work.",
   "type": "module",
   "scripts": {
