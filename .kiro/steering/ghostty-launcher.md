@@ -2,25 +2,31 @@
 inclusion: manual
 ---
 
-# Crypte — lanceur Ghostty et VPS
+# Crypt — Ghostty launcher and VPS (terminal branch)
 
-Référencer avec `#ghostty-launcher` quand on touche au lancement ou au VPS.
+Scope: the terminal version of Crypt (`kiro-horror-tui`), which lives on
+the branch `feat/project-space-3d` of this repository. The desktop app
+(Tauri) does not use the launcher.
 
-- `ghostty/crypte` : lance le TUI sur place si le terminal peut héberger la
-  crypte (TTY interactif, truecolor, ≥ 80x24), sinon ouvre une fenêtre Ghostty
-  habillée (thème + shader, build release si besoin). `--window` force la
-  fenêtre ; `--help`, `--smoke`, `--once`, `--sheet`, `--preview` tournent
-  toujours sur place. Si truecolor non annoncé : `export COLORTERM=truecolor`.
-- `ghostty/crypte rebuild …` : synchronise le dernier `origin/main` dans un
-  worktree dédié `<nom>-latest`, force un build release, puis le lance avec
-  les args restants. Le checkout courant n'est jamais touché (arbre sale OK ;
-  seul un worktree géré sale refuse). Ensuite, un lancement simple ouvre le
-  build latest s'il existe, sinon celui du checkout.
-- `ghostty/crypte.conf` (palette, padding étendu, 120x36) +
-  `ghostty/crypte.glsl` (vignette statique — pas de blur : chaque pixel est
-  lu à sa propre place). Capacités Ghostty utilisées : Kitty graphics,
-  truecolor, sprites intégrés, OSC 11 / OSC 2 / OSC 9;4 (progression native
-  pendant la simmer), mode 2026 (rendu synchronisé).
-- VPS + flux d'événements live : #[[file:docs/VPS.md]] ; flux JSONL temps
-  réel via `--events-log` / `KH_EVENTS_LOG` (chats + sous-agents, silencieux
-  si désactivé). Profils VPS : `~/.config/kiro-horror-tui/vps.toml`.
+Reference with `#ghostty-launcher` when touching the launch experience
+or the VPS features of the terminal build.
+
+- `ghostty/crypte`: runs the TUI in place if the terminal can host the
+  crypt (interactive TTY, truecolor, ≥ 80x24), otherwise opens a dressed
+  Ghostty window (theme + shader, release build if needed). `--window`
+  forces the window; `--help`, `--smoke`, `--once`, `--sheet`,
+  `--preview` always run in place. If truecolor is not announced:
+  `export COLORTERM=truecolor`.
+- `ghostty/crypte rebuild …`: syncs the latest `origin/main` into a
+  dedicated worktree `<name>-latest`, forces a release build, then
+  launches it with the remaining args. The current checkout is never
+  touched (a dirty tree is fine; only a dirty generated worktree
+  refuses).
+- `ghostty/crypte.conf` (palette, wide padding, 120x36) +
+  `ghostty/crypte.glsl` (static vignette — no blur: every pixel is read
+  at its own place). Ghostty features used: Kitty graphics, truecolor,
+  integrated sprites, OSC 11 / OSC 2 / OSC 9;4 (native progress), mode
+  2026 (synchronized rendering).
+- VPS + live event stream: #[[file:docs/VPS.md]]; live JSONL stream via
+  `--events-log` / `KH_EVENTS_LOG` (chats + sub-agents, silent when
+  disabled). VPS profiles: `~/.config/kiro-horror-tui/vps.toml`.

@@ -1,24 +1,27 @@
 {
   "name": "crypte-verif",
-  "description": "Verifie la Crypte : build 0 warning, fmt, tests, smoke headless, puis relecture 500/30.",
+  "description": "Verify Crypt: Rust build with 0 warning, fmt, clippy, tests, frontend types, vitest and build. Run from the repository root.",
   "steps": [
     {
       "type": "step",
       "id": "build",
       "agent": "wf-coder",
-      "prompt": "Dans ce depot Rust (kiro-horror-tui), lance `cargo build` puis `cargo fmt --check`. Corrige les warnings et le formatage si besoin. Termine par send_message severity success avec le resume : warnings restants (0 exige) et resultat fmt. Reponds en francais."
+      "prompt": "In this Tauri v2 + Svelte 5 repository (Rust in `src-tauri/`), run from the repository root: `cargo fmt --manifest-path src-tauri/Cargo.toml --check`, then `cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings`. Fix the warnings and the formatting if needed. End with send_message severity success summarising: remaining warnings (0 expected) and the fmt result. Answer in English.",
+      "artifacts": {
+        "build": ".kiro/workflow-output/build.txt"
+      }
     },
     {
       "type": "step",
       "id": "test",
       "agent": "wf-coder",
-      "prompt": "Resultat du build :\n\n{{build.output}}\n\nLance `cargo test` puis `./target/debug/kiro-horror-tui --smoke` (rendu headless 80x24, sans reseau ni cle). Si un test echoue, diagnostique et corrige, puis relance. Termine par send_message severity success avec : tests (x/y verts), smoke OK/KO. Reponds en francais."
+      "prompt": "Build result:\n\n{{build.output}}\n\nRun from the repository root: `cargo test --manifest-path src-tauri/Cargo.toml`, then `npm run check`, `npm test` and `npm run build`. If a test fails, diagnose and fix it, then rerun. End with send_message severity success giving: tests (x/y green), vitest (x/y green), svelte-check errors (0 expected) and the build result. Answer in English."
     },
     {
       "type": "step",
-      "id": "relecture",
+      "id": "review",
       "agent": "crypte-relecteur",
-      "prompt": "Build :\n\n{{build.output}}\n\nTests :\n\n{{test.output}}\n\nApplique ta grille de relecture sur les fichiers modifies (git diff --name-only contre origin/main) : 500 lignes et 30 fonctions max par fichier, fonction < 50 lignes, zero duplication, couleurs via theme.rs, UI en anglais, pas de cle logguee. Tu es en lecture seule : rends le tableau fichier/lignes/fns/verdict + les commandes relancees. Termine par send_message severity success avec ton verdict final."
+      "prompt": "Build:\n\n{{build.output}}\n\nTests:\n\n{{test.output}}\n\nApply your review grid to the files changed against main (`git diff --name-only origin/main`): 500 lines and 30 functions max per file, functions under 50 lines, zero duplication, colours through the palette (Rust: `src-tauri/src/theme.rs`; CSS: the `--cry-*` variables of `src/lib/crypte.css`), UI in English, no logged key. You are read-only: return the file/lines/functions/verdict table plus the commands you reran. End with send_message severity success and your final verdict. Answer in English."
     }
   ]
 }

@@ -1,68 +1,66 @@
-# Portefeuille persistant — requirements
+# Persistent wallet — requirements
 
-> Statut : feature retirée le 2026-11-14 (shop supprimé). La spec est
-> conservée comme trace du travail Kiro ; elle n'est plus implémentée.
+> **Status: retired on 2026-11-14** (the shop was removed from the product).
+> The spec is kept as a trace of the Kiro work; it is **not implemented any
+> more** and must not be read as a feature of Crypt.
 
-Aujourd'hui, les pièces de la boutique (F6) n'existent que pour la
-session en cours : quitter la TUI efface les pièces gagnées et les
-pièces dépensées. Cette feature conserve le portefeuille entre les
-sessions, comme l'almanach conserve déjà les tokens par jour. Le
-change reste inchangé : 1 token consommé = 1 pièce gagnée.
+The shop coins (F6) only ever existed for the current session: quitting the
+app erased the earned and the spent coins. This feature kept the wallet
+between the sessions, the way the almanac already keeps the tokens per day.
+The exchange rate never changes: 1 consumed token = 1 earned coin.
 
-## 1. Conservation du solde entre les sessions
+## 1. Balance kept between the sessions
 
-**User story.** En tant que joueur de la crypte, je veux que mes
-pièces survivent au redémarrage, pour pouvoir économiser en vue des
-gros articles (eau bénite, 900 pièces) sur plusieurs soirs.
+**User story.** As a player of the crypt, I want my coins to survive a
+restart, so that I can save up for the big items (holy water, 900 coins)
+over several evenings.
 
-- R1. QUAND la TUI démarre ET QU'un fichier portefeuille valide existe,
-  ALORS LE SYSTÈME DOIT recharger les pièces gagnées et dépensées
-  cumulées avant le premier affichage de la boutique.
-- R2. QUAND un achat réussit, ALORS LE SYSTÈME DOIT sauvegarder aussitôt
-  les pièces gagnées et dépensées cumulées sur disque.
-- R3. QUAND la TUI se ferme normalement, ALORS LE SYSTÈME DOIT
-  sauvegarder les pièces gagnées et dépensées cumulées sur disque.
-- R4. QUAND aucun fichier portefeuille n'existe (premier lancement),
-  ALORS LE SYSTÈME DOIT partir de zéro pièce gagnée et zéro dépensée,
-  sans erreur ni message.
+- R1. WHEN the app starts AND a valid wallet file exists, THEN THE SYSTEM
+  SHALL reload the cumulative earned and spent coins before the shop is
+  displayed for the first time.
+- R2. WHEN a purchase succeeds, THEN THE SYSTEM SHALL immediately save the
+  cumulative earned and spent coins to disk.
+- R3. WHEN the app closes normally, THEN THE SYSTEM SHALL save the
+  cumulative earned and spent coins to disk.
+- R4. WHEN no wallet file exists (first launch), THEN THE SYSTEM SHALL
+  start from zero earned and zero spent coins, without error nor message.
 
-## 2. Fichier illisible ou corrompu
+## 2. Unreadable or corrupted file
 
-**User story.** En tant que joueur, je veux que la boutique continue
-de marcher même si son fichier est abîmé, pour ne jamais perdre ma
-soirée à cause d'un JSON cassé.
+**User story.** As a player, I want the shop to keep working even if its
+file is damaged, so that I never lose an evening to a broken JSON.
 
-- R5. QUAND le fichier portefeuille est illisible ou invalide, ALORS LE
-  SYSTÈME DOIT repartir de zéro en mémoire, ne jamais écraser le
-  fichier fautif, et signaler l'erreur dans `/usage`.
-- R6. QUAND une sauvegarde échoue (disque plein, permissions), ALORS LE
-  SYSTÈME DOIT garder la session en mémoire telle quelle et signaler
-  l'erreur dans `/usage`, sans fermer ni bloquer la boutique.
+- R5. WHEN the wallet file is unreadable or invalid, THEN THE SYSTEM SHALL
+  restart from zero in memory, never overwrite the faulty file, and report
+  the error in `/usage`.
+- R6. WHEN a save fails (full disk, permissions), THEN THE SYSTEM SHALL
+  keep the in-memory session untouched and report the error in `/usage`,
+  without closing nor blocking the shop.
 
-## 3. Plusieurs cryptes ouvertes à la fois
+## 3. Several crypts open at once
 
-**User story.** En tant que joueur, je veux ouvrir deux cryptes sans
-qu'elles s'effacent mutuellement leurs pièces.
+**User story.** As a player, I want to open two crypts without them erasing
+each other's coins.
 
-- R7. QUAND deux instances sauvegardent le portefeuille, ALORS LE
-  SYSTÈME DOIT fusionner en gardant les plus grands cumuls (gagnées
-  et dépensées), jamais écraser un cumul plus élevé par un plus bas.
+- R7. WHEN two instances save the wallet, THEN THE SYSTEM SHALL merge by
+  keeping the highest cumulates (earned and spent), never overwriting a
+  higher cumulate with a lower one.
 
-## 4. Affichage
+## 4. Display
 
-**User story.** En tant que joueur, je veux voir mes totaux de vie
-entière, pour savoir combien j'ai gagné et dépensé depuis toujours.
+**User story.** As a player, I want to see my lifetime totals, to know how
+much I have earned and spent since forever.
 
-- R8. QUAND j'ouvre `/usage`, ALORS LE SYSTÈME DOIT afficher les pièces
-  gagnées et dépensées cumulées sur toutes les sessions, en plus du
-  solde courant.
-- R9. QUAND j'ouvre la boutique (F6), ALORS LE SYSTÈME DOIT afficher le
-  même en-tête qu'aujourd'hui (solde + gagnées + dépensées), les
-  chiffres devenant les cumuls vie entière.
+- R8. WHEN I open `/usage`, THEN THE SYSTEM SHALL display the earned and
+  spent coins cumulated over all the sessions, in addition to the current
+  balance.
+- R9. WHEN I open the shop (F6), THEN THE SYSTEM SHALL display the same
+  header as before (balance + earned + spent), the figures becoming the
+  lifetime cumulates.
 
-## 5. Non-objectifs
+## 5. Non-goals
 
-- Aucun chiffrement : les pièces n'ont aucune valeur, contrairement aux
-  clés API du coffre `/settings`.
-- Aucune remise à zéro automatique ou manuelle des cumuls.
-- Aucun transfert ni partage du portefeuille entre machines.
+- No encryption: the coins have no value, unlike the API keys of the
+  `/settings` vault.
+- No automatic nor manual reset of the cumulates.
+- No transfer nor sharing of the wallet between machines.

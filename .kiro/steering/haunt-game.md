@@ -1,28 +1,34 @@
 ---
 inclusion: fileMatch
 fileMatchPattern:
-  - "src/haunt/**"
-  - "src/app/haunt.rs"
+  - "src-tauri/src/haunt/**"
+  - "src-tauri/src/haunt.rs"
 ---
 
-# Crypte — Haunt, le jeu F9
+# Crypt — Haunt, the F9 game
 
-Plateformer/tir original (Kiro envoie des tokens), niveau 1 « The Boneyard »
-très difficile, vue 960×576, dalles 6 px, styles créatures.
+Original platform/shooter minigame (Kiro fires tokens), level 1 "The
+Boneyard" is very hard, 960×576 view, 6 px tiles, creature pixel style.
 
-- **Simulation à pas fixe 240 Hz** : vitesses et durées écrites en pas de
-  référence de 1/30 s, **toujours multipliées par `DT` / `SUB`**.
-  L'écran est redessiné jusqu'à 240 fois/s ; l'encodage PNG Kitty tourne sur
-  3 fils (`hub/live.rs`, frames numérotées, jamais d'attente ni de désordre).
-- Entrées : `a`/`d` (ou ←/→), `w` saut 4 dalles, `s` s'enfoncer
-  (`s`+`w` traverse une dalle), Espace = tir (2 max en vol), Entrée =
-  start/relever, `p` pause, Échap/F9 = retour chat (run en pause).
-- Protocole clavier Kitty empilé **seulement en jeu** (`app/haunt.rs`) ;
-  ailleurs : halfblocks + répétition de touches.
-- Niveau = grille texte `assets/haunt/niveau-1.txt` (une lettre par dalle,
-  dernière ligne = zones du directeur) ; les tests vérifient que l'arène
-  est atteignable. Sprites = grilles à lettres de palette.
-- Look « 32-bit » : upscale entier au plus proche (×1, ×2 HiDPI), ciel
-  tramé aux jointures, parallaxe, brouillard, vignette.
-- Coût d'une frame : `cargo test --release -- --ignored frame_budget --nocapture`.
-- Après retouche : `./target/debug/kiro-horror-tui --haunt-shot /tmp/haunt.png`.
+- **Fixed-step simulation at 240 Hz**: speeds and durations are written
+  in 1/30 s reference steps and **always multiplied by `DT` / `SUB`**.
+  The screen is redrawn up to 240 times/s; the PNG encoding runs on 3
+  threads (`hub/live.rs`, numbered frames, never waiting, never out of
+  order).
+- Inputs: `a`/`d` (or `←`/`→`), `w` jump 4 tiles, `s` duck (`s`+`w`
+  goes through a tile), Space = shoot (2 in flight max), Enter = start /
+  put down, `p` pause, `Esc`/F9 = back to the chat (the game runs paused).
+- The Kitty keyboard protocol is stacked **only in game** (`app/haunt.rs`);
+  everywhere else: halfblocks + key repeat.
+- Level = text grid `src-tauri/assets/haunt/niveau-1.txt` (one letter per
+  tile, last line = director zones); the tests check that the spider is
+  reachable. Sprites = grids of palette letters.
+- Look: 32-bit upscale, integer nearest (HiDPI), sky dithered at the
+  seams, parallax, fog, vignette.
+- Cost of one frame: `cargo test --release --manifest-path src-tauri/Cargo.toml -- --ignored frame_budget --nocapture`.
+- After a sprite change: regenerate the shot
+  (`cargo run --manifest-path src-tauri/Cargo.toml -- --haunt-shot /tmp/haunt.png`).
+
+In the desktop app the game lives in the `haunt` screen
+(`src/routes/haunt/`, `src/lib/screens/HauntView.svelte`): the Rust side
+keeps the simulation, the frontend renders the frames.

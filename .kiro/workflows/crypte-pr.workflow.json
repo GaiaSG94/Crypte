@@ -1,29 +1,29 @@
 {
   "name": "crypte-pr",
-  "description": "Ouvre la PR vers main (squash, update par merge) puis repond aux revues et checks jusqu'au vert.",
+  "description": "Opens the pull request towards main (squash, updated by merge) then answers the reviews and the checks until green.",
   "inputs": {
-    "titre": "string"
+    "title": "string"
   },
   "steps": [
     {
       "type": "step",
-      "id": "ouvrir-pr",
+      "id": "open-pr",
       "agent": "wf-pr-submitter",
-      "prompt": "Ouvre (ou reutilise) une pull request vers la branche main avec pour titre : {{titre}}. Discipline du depot : merge en squash, mise a jour par merge de main (jamais de rebase ni de force-push sur la branche), le label hold garde une PR hors file (ne l'ajoute pas sauf demande). Enregistre {\"url\": \"...\"} dans .kiro/workflow-output/pr.json. Termine par send_message severity success avec l'URL de la PR.",
+      "prompt": "Open (or reuse) a pull request towards the main branch with the title: {{title}}. Repository discipline: squash merge, updated by merging main (never a rebase and never a force-push on the branch), the `hold` label keeps a PR out of the queue (do not add it unless asked). Save {\"url\": \"...\"} in .kiro/workflow-output/pr.json. End with send_message severity success with the PR URL.",
       "artifacts": {
         "pr": ".kiro/workflow-output/pr.json"
       }
     },
     {
       "type": "repeat",
-      "id": "boucle-revue",
+      "id": "review-loop",
       "maxIterations": 10,
       "onMaxIterations": "pause",
-      "stopWhen": "attente-pr.terminal",
+      "stopWhen": "pr-wait.terminal",
       "steps": [
         {
           "type": "watch",
-          "id": "attente-pr",
+          "id": "pr-wait",
           "handler": "github-pr",
           "config": {
             "prRef": ".kiro/workflow-output/pr.json",
@@ -33,9 +33,9 @@
         },
         {
           "type": "step",
-          "id": "repondre",
+          "id": "respond",
           "agent": "wf-pr-responder",
-          "prompt": "Activite de la PR (revues, commentaires, checks, etat merge) :\n\n{{attente-pr.output}}\n\nTraite les nouveaux commentaires et les checks en echec (details via `gh pr view <url> --json statusCheckRollup` si besoin). Si mergeable est CONFLICTING, mets a jour par merge de main (commit de merge, jamais rebase ni force-push). Tolere les doublons (livraison au moins une fois). Si le payload est un idle-timeout ou un etat MERGED/CLOSED, rapporte-le sans rien changer. Termine par send_message severity success avec le resume de l'intervention."
+          "prompt": "PR activity (reviews, comments, checks, merge state):\n\n{{pr-wait.output}}\n\nHandle the new comments and the failing checks (details via `gh pr view <url> --json statusCheckRollup` if needed). If mergeable is CONFLICTING, update the branch by merging main (merge commit, never a rebase and never a force-push). Tolerate duplicates (at-least-once delivery). If the payload is an idle timeout or a MERGED/CLOSED state, report it without changing anything. End with send_message severity success and a summary of the intervention."
         }
       ]
     }
