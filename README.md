@@ -27,6 +27,11 @@ LM Studio, vLLM…). Add the base URL, paste the key (masked, stored in an
 encrypted vault, never logged) and pick a model. The demo exits by
 itself the moment a provider connects.
 
+No paid key? A **local** provider is enough and stays on your machine:
+[Ollama](https://ollama.com) (`ollama serve`, then
+`http://localhost:11434/v1` with any model you pulled) or LM Studio. The
+crypt then talks to your own machine, with no account and no bill.
+
 ## Install
 
 Releases : <https://github.com/Tradoooo/Crypte/releases> (bundles Tauri
