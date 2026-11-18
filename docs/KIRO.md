@@ -138,7 +138,7 @@ without confirmation, `/mcp` status.
 
 Crypt reads Kiro **powers** (Agent Plugins: `plugin.json`, `POWER.md`,
 embedded `skills/`, `mcp.json` with a per-power `cwd`). An example power is
-versioned in this repository: `examples/powers/crypt-scene/` (PR #177) —
+versioned in this repository: `examples/powers/crypt-scene/` (PR #179) —
 install it in `~/.kiro/powers/` to give any Kiro agent the crypt's scene
 diagnostics (the README explains the install).
 
@@ -160,7 +160,7 @@ diagnostics (the README explains the install).
   active tab visible, shown + hidden = total, and never overflow the panel.
 - Wired into `rust-task.json` and `front-task.json` (PostTaskExecution), so
   a Kiro session cannot finish with a broken invariant; the CI runs the same
-  suites on every PR (#174).
+  suites on every PR (merged in #174).
 
 ## The numbers (main, at the time of writing)
 
