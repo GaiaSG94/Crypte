@@ -56,11 +56,11 @@ the Kiro workflow in this repository.
   districts never overlap, every file has a position); proptest on the
   Rust side (the scan invariants: every file attached to a valid folder,
   unique paths, deterministic order).
-  → **#173**.
+  → **#174**.
 
 - [x] 11. Document the feature: the steering `project-space.md`, the
   design reference and the README.
   Detail: the steering describes the contract, the palette, the layout
   rules and the tabs; the README shows the journey (open a project, press
   F7).
-  → **#172**.
+  → **#173** (steering) and **#176** (README).
