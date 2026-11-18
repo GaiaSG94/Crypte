@@ -55,6 +55,13 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
+      - name: Cache APT (index + archives deb)
+        uses: actions/cache@v4
+        with:
+          path: |
+            /var/lib/apt/lists
+            /var/cache/apt/archives
+          key: apt-tauri-syslibs-v1
       - name: Syslibs Tauri (webkit)
         run: |
           if pkg-config --exists webkit2gtk-4.1 gtk+-3.0 librsvg-2.0; then
@@ -82,6 +89,13 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
+      - name: Cache APT (index + archives deb)
+        uses: actions/cache@v4
+        with:
+          path: |
+            /var/lib/apt/lists
+            /var/cache/apt/archives
+          key: apt-tauri-syslibs-v1
       - name: Syslibs Tauri (webkit)
         run: |
           if pkg-config --exists webkit2gtk-4.1 gtk+-3.0 librsvg-2.0; then
@@ -109,6 +123,13 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
+      - name: Cache APT (index + archives deb)
+        uses: actions/cache@v4
+        with:
+          path: |
+            /var/lib/apt/lists
+            /var/cache/apt/archives
+          key: apt-tauri-syslibs-v1
       - name: Syslibs Tauri (webkit)
         run: |
           if pkg-config --exists webkit2gtk-4.1 gtk+-3.0 librsvg-2.0; then
