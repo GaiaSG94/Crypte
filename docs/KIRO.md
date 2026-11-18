@@ -169,6 +169,9 @@ diagnostics (the README explains the install).
 - The demo video says "448 tests": that is the **terminal build**
   (`feat/project-space-3d`, the TUI). The desktop app counts 469 + 47 —
   TUI + desktop, same suites, two products.
+- The judges can also install the app **without any API key**: the offline
+  demo mode (#175) replays a full agent session locally — no network, no
+  key, no account.
 
 ## Credits
 
