@@ -1,14 +1,36 @@
 <!-- SpaceTermHead.svelte — barre de titre du panneau de chat quand le fond 3D
-     est actif (DESIGN §4, §11.1) : trois points (le premier orange), une
-     rangée d'onglets (un par chat ouvert, point d'état, +N au-delà de 4,
-     bouton +), et ⌘K. Clic = changer de chat, clic milieu = fermer. -->
+     est actif (DESIGN §4, §11.1 V2.1) : trois points (le premier orange), une
+     rangée d'onglets (un par chat ouvert, point d'état, puce « +N » selon la
+     place réelle, bouton +), et ⌘K. Clic = changer de chat, clic milieu =
+     fermer. Le libellé est le nom du chat seul ; les onglets se rétrécissent,
+     le « + » et ⌘K ne sont jamais coupés. -->
 <script lang="ts">
+  import { onMount } from "svelte";
   import { activeIndex, chats, closeChat, newChat, selectChat } from "../chat/store";
   import { space } from "./store.svelte";
-  import { tabsOf } from "./tabs";
+  import { fitTabs, tabsOf } from "./tabs";
 
-  let project = $derived(space.state.projects[0]?.name ?? "crypt");
-  let tabs = $derived(tabsOf($chats, $activeIndex, project));
+  let tabsBox: HTMLDivElement | null = $state(null);
+  let meter: HTMLSpanElement | null = $state(null);
+  let width = $state(0);
+  let charWidth = $state(7.2); // monospace 12 px, mesuré au montage (10 caractères).
+
+  let all = $derived(tabsOf($chats, $activeIndex));
+  let tabs = $derived(fitTabs(all, width, charWidth));
+
+  onMount(() => {
+    if (meter) {
+      charWidth = meter.getBoundingClientRect().width / 10;
+    }
+    const box = tabsBox;
+    if (!box) return;
+    const ro = new ResizeObserver(() => {
+      width = box.getBoundingClientRect().width;
+    });
+    ro.observe(box);
+    width = box.getBoundingClientRect().width;
+    return () => ro.disconnect();
+  });
 
   function pick(event: MouseEvent, index: number): void {
     if (event.button === 1) {
@@ -22,7 +44,8 @@
 
 <div class="space-thead">
   <span class="dots" aria-hidden="true"><i class="on"></i><i></i><i></i></span>
-  <div class="tabs" role="tablist" aria-label="Chats ouverts">
+  <div class="tabs" bind:this={tabsBox} role="tablist" aria-label="Chats ouverts">
+    <span class="meter" bind:this={meter} aria-hidden="true">MMMMMMMMMM</span>
     {#each tabs.shown as tab (tab.key)}
       <button
         class="tab"

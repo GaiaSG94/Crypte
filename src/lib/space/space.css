@@ -310,8 +310,9 @@
 }
 
 /* onglets de chats (DESIGN §11.1) : un par chat ouvert, point d'état
-   (orange pulsant = agent actif, blanc = repos, rouge = question),
-   actif en os plein, au-delà de 4 : puce « +N », bouton « + ». */
+    (orange pulsant = agent actif, blanc = repos, rouge = question),
+    actif en os plein ; ce qui ne tient pas passe derrière la puce « +N »
+    (calculé sur la place réelle), bouton « + ». */
 .space-thead .tabs {
   flex: 1;
   min-width: 0;
@@ -320,9 +321,18 @@
   gap: 6px;
   overflow: hidden;
 }
+/* mesure de la chasse du mono (10 caractères) : invisible, hors flux */
+.space-thead .meter {
+  position: absolute;
+  visibility: hidden;
+  white-space: pre;
+  font: 400 12px/1 var(--space-mono);
+  pointer-events: none;
+}
 .space-thead .tab {
-  flex: none;
-  max-width: 18ch;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 16ch;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -345,6 +355,7 @@
   font-weight: 500;
 }
 .space-thead .tab.add {
+  flex: none; /* le « + » n'est jamais coupé */
   border-style: dashed;
   padding: 0 9px;
   font-size: 14px;
