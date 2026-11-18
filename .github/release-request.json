@@ -1,5 +1,5 @@
 {
-  "tag": "v1.0.2",
+  "tag": "v1.0.3",
   "status": "pending",
-  "comment": "Publication v1.0.2 : version des bundles alignee sur le tag (crypte_1.0.2_*) + tarballs TUI sans boutique (#168 sur feat/project-space-3d). La modification de ce fichier declenche le workflow release.yml sur main (bundles Tauri 3 OS + binaires TUI, GitHub Release). status=published apres succes."
+  "comment": "Publication v1.0.3 : demos hors-ligne (Try the demo), onglets V2.1, suite verte sous Windows (469 + 47 tests), property-based testing, .kiro reeligne en anglais, spec vivante project-space-3d, README pour les juges + docs/KIRO.md, power d exemple, nettoyage des chemins personnels. Declenche release.yml sur main (bundles Tauri 3 OS + binaires TUI, GitHub Release). status=published apres succes."
 }
